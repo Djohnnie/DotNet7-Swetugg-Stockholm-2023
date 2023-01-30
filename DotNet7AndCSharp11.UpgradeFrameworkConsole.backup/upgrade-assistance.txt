@@ -1,0 +1,7 @@
+﻿
+https://microsoft.github.io/sarif-web-component/
+
+
+upgrade-assistant analyze DotNet7AndCSharp11.UpgradeFrameworkConsole.csproj
+
+upgrade-assistant upgrade DotNet7AndCSharp11.UpgradeFrameworkConsole.csproj

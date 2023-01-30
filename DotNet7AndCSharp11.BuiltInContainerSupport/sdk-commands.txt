@@ -1,0 +1,4 @@
+﻿
+dotnet publish --os linux --arch x64 -p:PublishProfile=DefaultContainer
+
+docker run -it --rm -p 5050:80 swetugg2022.builtincontainersupport:1.0.0

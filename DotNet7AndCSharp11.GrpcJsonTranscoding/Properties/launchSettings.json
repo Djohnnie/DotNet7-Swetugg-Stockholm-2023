@@ -1,0 +1,13 @@
+﻿{
+  "profiles": {
+    "DotNet7AndCSharp11.GrpcJsonTranscoding": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": false,
+      "applicationUrl": "http://localhost:5030;https://localhost:7030",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
