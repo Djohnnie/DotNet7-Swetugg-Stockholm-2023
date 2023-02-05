@@ -1,22 +1,11 @@
-﻿
-
-Method(3);
+﻿using System.ComponentModel;
 
 
+DoSomething("Hello, World!");
 
 
-
-[Test(ParameterName = nameof(value))]
-void Method(int value)
+[Description(nameof(message))]
+static void DoSomething(string message)
 {
-    Console.WriteLine(value);
-}
-
-
-
-
-[AttributeUsage(AttributeTargets.Method)]
-class TestAttribute : Attribute
-{
-    public string ParameterName { get; set; }
+    Console.WriteLine(message);
 }
