@@ -1,5 +1,4 @@
 ﻿using DotNet7AndCSharp11.OrleansContracts;
-using Orleans.Runtime;
 
 namespace DotNet7AndCSharp11.Orleans.Grains;
 
@@ -13,7 +12,7 @@ public interface IGameGrain : IGrainWithStringKey
     Task ReadyPlayer(string playerName);
     Task UpdateFood(string foodData);
     Task UpdatePlayerStates(List<OrleansContracts.PlayerState> playerStates);
-    Task AbandonPlayer(string playerName);
+    Task<bool> AbandonPlayer(string playerName);
     Task<Orientation?> GetPlayerOrientation(string playerName);
 }
 
@@ -108,36 +107,22 @@ public class GameGrain : Grain, IGameGrain
         }
     }
 
-    public async Task AbandonPlayer(string playerName)
+    public async Task<bool> AbandonPlayer(string playerName)
     {
         if (_state.PlayerNames.Contains(playerName))
         {
             var playerGrain = GrainFactory.GetGrain<IPlayerGrain>(playerName);
             await playerGrain.Abandon();
+            _state.PlayerNames.Remove(playerName);
 
-            var isReady = _state.IsReady;
-
-            foreach (var player in _state.PlayerNames)
+            if (_state.PlayerNames.Count == 0)
             {
-                if (player != playerName)
-                {
-                    playerGrain = GrainFactory.GetGrain<IPlayerGrain>(player);
-                    if (!await playerGrain.IsReady())
-                    {
-                        isReady = false;
-                    }
-                }
-            }
-
-            if (isReady)
-            {
-                await ReadyGame();
-            }
-            else
-            {
-                await UnreadyGame();
+                _state.IsActive = false;
+                DeactivateOnIdle();
             }
         }
+
+        return _state.IsActive;
     }
 
     public async Task<Orientation?> GetPlayerOrientation(string playerName)

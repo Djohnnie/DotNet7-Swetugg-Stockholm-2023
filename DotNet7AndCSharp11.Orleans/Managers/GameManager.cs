@@ -95,7 +95,7 @@ public class GameManager
     {
         var gameGrain = _grainFactory.GetGrain<IGameGrain>(gameCode);
         var orientation = await gameGrain.GetPlayerOrientation(playerName);
-        
+
         if (orientation != null)
         {
             return orientation.Value;
@@ -106,8 +106,8 @@ public class GameManager
 
     public async Task<AbandonResponse> Abandon(AbandonRequest request)
     {
-        var gameGrain = _grainFactory.GetGrain<IGameGrain>(request.GameCode);
-        await gameGrain.AbandonPlayer(request.PlayerName);
+        var gamesGrain = _grainFactory.GetGrain<IGamesGrain>(Guid.Empty);
+        await gamesGrain.AbandonPlayer(request.GameCode, request.PlayerName);
 
         return new AbandonResponse();
     }

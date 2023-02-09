@@ -9,6 +9,7 @@ public interface IGamesGrain : IGrainWithGuidKey
     Task CreateGame(string gameCode, Player player);
     Task<string?> GetGame(string gameCode);
     Task<List<Game>> GetActiveGames();
+    Task AbandonPlayer(string gameCode, string playerName);
 }
 
 public class GamesState
@@ -19,12 +20,6 @@ public class GamesState
 public class GamesGrain : Grain, IGamesGrain
 {
     private readonly GamesState _state = new GamesState();
-    //private readonly IPersistentState<GamesState> _state;
-
-    //public GamesGrain(IPersistentState<GamesState> state)
-    //{
-    //    _state = state;
-    //}
 
     public Task<bool> GameCodeExists(string gameCode)
     {
@@ -66,5 +61,21 @@ public class GamesGrain : Grain, IGamesGrain
         }
 
         return activeGames;
+    }
+
+    public async Task AbandonPlayer(string gameCode, string playerName)
+    {
+        var gameGrain = GrainFactory.GetGrain<IGameGrain>(gameCode);
+        var isActive = await gameGrain.AbandonPlayer(playerName);
+
+        if (!isActive)
+        {
+            _state.GameCodes.Remove(gameCode);
+
+            if (_state.GameCodes.Count == 0)
+            {
+                DeactivateOnIdle();
+            }
+        }
     }
 }

@@ -47,7 +47,7 @@ public class PlayerGrain : Grain, IPlayerGrain
 
     public async Task Abandon()
     {
-        _state.IsReady = false;
+        DeactivateOnIdle();
     }
 
     public Task<bool> IsReady()
@@ -75,7 +75,7 @@ public class PlayerGrain : Grain, IPlayerGrain
     public Task ReadyPlayer()
     {
         _state.IsReady = true;
-        
+
         return Task.CompletedTask;
     }
 }
