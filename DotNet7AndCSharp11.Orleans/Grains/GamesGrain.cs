@@ -1,0 +1,70 @@
+﻿using DotNet7AndCSharp11.OrleansContracts;
+using Orleans.Runtime;
+
+namespace DotNet7AndCSharp11.Orleans.Grains;
+
+public interface IGamesGrain : IGrainWithGuidKey
+{
+    Task<bool> GameCodeExists(string gameCode);
+    Task CreateGame(string gameCode, Player player);
+    Task<string?> GetGame(string gameCode);
+    Task<List<Game>> GetActiveGames();
+}
+
+public class GamesState
+{
+    public List<string> GameCodes { get; set; } = new List<string>();
+}
+
+public class GamesGrain : Grain, IGamesGrain
+{
+    private readonly GamesState _state = new GamesState();
+    //private readonly IPersistentState<GamesState> _state;
+
+    //public GamesGrain(IPersistentState<GamesState> state)
+    //{
+    //    _state = state;
+    //}
+
+    public Task<bool> GameCodeExists(string gameCode)
+    {
+        return Task.FromResult(_state.GameCodes.Contains(gameCode));
+    }
+
+    public async Task CreateGame(string gameCode, Player player)
+    {
+        var gameGrain = GrainFactory.GetGrain<IGameGrain>(gameCode);
+        await gameGrain.CreateGame();
+        _state.GameCodes.Add(gameCode);
+
+        await gameGrain.AddPlayer(player);
+    }
+
+    public Task<string?> GetGame(string gameCode)
+    {
+        if (_state.GameCodes.Contains(gameCode))
+        {
+            return Task.FromResult((string?)gameCode);
+        }
+
+        return Task.FromResult((string?)null);
+    }
+
+    public async Task<List<Game>> GetActiveGames()
+    {
+        var activeGames = new List<Game>();
+
+        foreach (var gameCode in _state.GameCodes)
+        {
+            var gameGrain = GrainFactory.GetGrain<IGameGrain>(gameCode);
+            var game = await gameGrain.GetGame();
+
+            if (game.IsActive)
+            {
+                activeGames.Add(game);
+            }
+        }
+
+        return activeGames;
+    }
+}
